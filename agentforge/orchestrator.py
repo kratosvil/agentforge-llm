@@ -27,6 +27,7 @@ from agentforge.utils import (
     write_validation, write_audit, run_validation,
     log_task_start, log_task_end, log_error,
 )
+from agentforge.utils.perf_monitor import PerfMonitor
 
 # Semaforo global — controla cuantas tareas Ollama corren en paralelo
 _semaphore = asyncio.Semaphore(MAX_PARALLEL_TASKS)
@@ -70,6 +71,10 @@ async def execute_task(manifest: ExecutionManifest) -> AuditRecord:
     async with _semaphore:
         record.status = TaskStatus.RUNNING
         write_audit(task_id, record)
+
+        from agentforge.utils.results import get_task_dir
+        monitor = PerfMonitor(task_id, get_task_dir(task_id))
+        monitor.start()
 
         try:
             handler = get_handler(manifest.task.type, manifest.task.subtype)
@@ -118,6 +123,8 @@ async def execute_task(manifest: ExecutionManifest) -> AuditRecord:
             log_error(task_id, str(e))
 
         finally:
+            await monitor.stop()
+
             record.finished_at = datetime.now(timezone.utc)
             if record.started_at:
                 delta = record.finished_at - record.started_at

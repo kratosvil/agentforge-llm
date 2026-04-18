@@ -60,7 +60,7 @@ def write_validation(task_id: str, result: ValidationResult) -> None:
 def write_audit(task_id: str, record: AuditRecord) -> None:
     """Actualiza el audit.json. Se llama al inicio y al final de cada tarea."""
     path = get_task_dir(task_id) / "audit.json"
-    path.write_text(record.model_dump_json(indent=2, default=str))
+    path.write_text(record.model_dump_json(indent=2))
 
 
 def read_audit(task_id: str) -> AuditRecord | None:

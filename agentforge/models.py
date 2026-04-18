@@ -28,6 +28,7 @@ class TaskType(str, Enum):
     ANALYZE_SECURITY = "analyze_security"
     UPDATE_DOCUMENT = "update_document"
     EXTRACT_STRUCTURE = "extract_structure"
+    GENERATE_CODE = "generate_code"
 
 
 class TaskSubtype(str, Enum):
@@ -45,6 +46,8 @@ class TaskSubtype(str, Enum):
     ESTADO_MD = "estado_md"
     # extract_structure
     TF_RESOURCES = "tf_resources"
+    # generate_code
+    PYTHON_FUNCTION = "python_function"
 
 
 class TaskStatus(str, Enum):
@@ -85,6 +88,7 @@ class TaskDefinition(BaseModel):
             TaskType.ANALYZE_SECURITY: [TaskSubtype.TFSEC_REPORT],
             TaskType.UPDATE_DOCUMENT: [TaskSubtype.ESTADO_MD],
             TaskType.EXTRACT_STRUCTURE: [TaskSubtype.TF_RESOURCES],
+            TaskType.GENERATE_CODE: [TaskSubtype.PYTHON_FUNCTION],
         }
         allowed = valid_combos.get(self.type, [])
         if self.subtype not in allowed:
@@ -100,6 +104,7 @@ class InputDefinition(BaseModel):
     source_files: list[str] = Field(default_factory=list)
     module_name: str = ""
     layer: str = ""                        # organization | platform | product
+    description: str = ""                  # prompt libre para tareas generate_code
     additional_context: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")

@@ -8,7 +8,7 @@ Para agregar un nuevo tipo de tarea:
 """
 
 from agentforge.models import TaskType, TaskSubtype
-from agentforge.handlers import generate, metadata, documentation, analyze, update, extract
+from agentforge.handlers import generate, metadata, documentation, analyze, update, extract, generate_code
 
 # Mapeo (type, subtype) -> funcion handler async
 HANDLER_MAP = {
@@ -20,6 +20,7 @@ HANDLER_MAP = {
     (TaskType.ANALYZE_SECURITY, TaskSubtype.TFSEC_REPORT): analyze.handle,
     (TaskType.UPDATE_DOCUMENT, TaskSubtype.ESTADO_MD): update.handle,
     (TaskType.EXTRACT_STRUCTURE, TaskSubtype.TF_RESOURCES): extract.handle,
+    (TaskType.GENERATE_CODE, TaskSubtype.PYTHON_FUNCTION): generate_code.handle,
 }
 
 
