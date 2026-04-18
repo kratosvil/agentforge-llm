@@ -53,6 +53,6 @@ spec:
       volumes:
         - name: ollama-models
           hostPath:
-            # Reutiliza modelos ya descargados en el host — evita re-descarga
-            path: /home/kratosvil/.ollama
+            # Reuses models already downloaded on the host — change to your $HOME/.ollama
+            path: /home/YOUR_USER/.ollama
             type: DirectoryOrCreate

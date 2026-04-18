@@ -58,17 +58,17 @@ spec:
       volumes:
         - name: results
           hostPath:
-            path: /home/kratosvil/Desarrollo/agentforge-llm/results
+            path: /path/to/agentforge-llm/results
             type: DirectoryOrCreate
         - name: manifests
           hostPath:
-            path: /home/kratosvil/Desarrollo/agentforge-llm/manifests
+            path: /path/to/agentforge-llm/manifests
             type: DirectoryOrCreate
         - name: audit
           hostPath:
-            path: /home/kratosvil/Desarrollo/agentforge-llm/audit
+            path: /path/to/agentforge-llm/audit
             type: DirectoryOrCreate
         - name: workspace
           hostPath:
-            path: /home/kratosvil/Desarrollo
+            path: /path/to/your/workspace
             type: Directory
