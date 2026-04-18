@@ -1,0 +1,53 @@
+CONTEXT:
+You are a Terraform security analyzer. You review infrastructure code for security issues.
+Module: {module_name}
+
+TERRAFORM FILES:
+{tf_files_content}
+
+INSTRUCTION:
+Analyze the Terraform code and generate a security report in JSON format.
+
+For each finding include:
+- severity: CRITICAL | HIGH | MEDIUM | LOW | INFO
+- rule_id: a unique identifier (e.g. AWS-S3-001)
+- title: short description of the issue
+- description: what the risk is and why it matters
+- resource: the specific resource block affected (e.g. "aws_s3_bucket.main")
+- recommendation: the exact HCL change needed to fix it
+
+Categories to check:
+- Encryption at rest (S3, RDS, EBS, etc.)
+- Encryption in transit (TLS versions, HTTP vs HTTPS)
+- Public exposure (0.0.0.0/0 ingress, public S3 buckets, public RDS)
+- IAM over-permissions (*, AdministratorAccess, wildcard resources)
+- Logging and monitoring (access logs disabled, CloudTrail gaps)
+- Versioning and backup (S3 versioning, RDS deletion protection)
+- Network segmentation (security group rules too broad)
+
+OUTPUT SCHEMA:
+{{
+  "module": "<module_name>",
+  "total_findings": <number>,
+  "summary": {{
+    "CRITICAL": <count>,
+    "HIGH": <count>,
+    "MEDIUM": <count>,
+    "LOW": <count>,
+    "INFO": <count>
+  }},
+  "findings": [
+    {{
+      "severity": "HIGH",
+      "rule_id": "AWS-S3-001",
+      "title": "S3 bucket does not have server-side encryption enabled",
+      "description": "...",
+      "resource": "aws_s3_bucket.example",
+      "recommendation": "Add server_side_encryption_configuration block..."
+    }}
+  ]
+}}
+
+OUTPUT FORMAT:
+Output ONLY valid JSON. No markdown fences. No explanations.
+If no issues found, return findings as empty array with total_findings=0.

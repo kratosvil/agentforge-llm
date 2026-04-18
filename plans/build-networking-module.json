@@ -1,0 +1,34 @@
+{
+  "plan_id": "build-networking-module",
+  "description": "Genera todos los archivos de boilerplate para el modulo networking de tf-modules-forge",
+  "project": "SV-TF-004",
+  "source_module": "/home/kratosvil/Desarrollo/tf-modules-forge/modules/networking",
+  "output_dir": "/home/kratosvil/Desarrollo/agentforge-llm/results",
+  "tasks": [
+    {
+      "type": "generate_boilerplate",
+      "subtype": "terraform_variables",
+      "depends_on": []
+    },
+    {
+      "type": "generate_boilerplate",
+      "subtype": "terraform_outputs",
+      "depends_on": []
+    },
+    {
+      "type": "generate_boilerplate",
+      "subtype": "terraform_versions",
+      "depends_on": []
+    },
+    {
+      "type": "generate_metadata",
+      "subtype": "module_metadata_json",
+      "depends_on": ["terraform_variables", "terraform_outputs"]
+    },
+    {
+      "type": "generate_documentation",
+      "subtype": "module_claude_md",
+      "depends_on": ["module_metadata_json"]
+    }
+  ]
+}

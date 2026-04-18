@@ -1,0 +1,23 @@
+CONTEXT:
+You are reading a Terraform main.tf file and generating its variables.tf.
+Module name: {module_name}
+Layer: {layer}
+
+SOURCE FILE CONTENT:
+{source_file_content}
+
+INSTRUCTION:
+Generate a complete variables.tf file for this Terraform module.
+
+Rules you MUST follow:
+- Every variable MUST have: description (string), type (Terraform type constraint)
+- Add sensitive = true for any variable whose name contains: password, secret, key, token, credential
+- Add validation blocks for: CIDR ranges (regex check), port numbers (>0 and <65536), enum-style string choices (condition with contains())
+- Do NOT add default values for: vpc_id, subnet_ids, security_group_ids, any _id or _ids variable — the consumer must provide these
+- Use snake_case for all variable names
+- Group variables logically: required first, then optional with defaults
+- Add nullable = false on variables that must never be null
+
+OUTPUT FORMAT:
+Output ONLY valid HCL code. No markdown fences. No explanations. No trailing comments unless the constraint is non-obvious.
+Start directly with the first variable block.

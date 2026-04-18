@@ -1,0 +1,74 @@
+# AgentForge MCP Server corriendo como pod.
+# Se comunica con Ollama via ClusterIP (http://ollama:11434).
+# Los resultados se escriben en un hostPath compartido con el host
+# para que Claude pueda leerlos directamente.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentforge-server
+  namespace: agentforge
+  labels:
+    app: agentforge-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agentforge-server
+  template:
+    metadata:
+      labels:
+        app: agentforge-server
+    spec:
+      containers:
+        - name: agentforge-server
+          image: agentforge-server:latest
+          imagePullPolicy: Never  # Imagen local construida con docker build
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          env:
+            - name: OLLAMA_HOST
+              value: "http://ollama:11434"
+            - name: MODEL_NAME
+              value: "qwen2.5-coder:7b"
+            - name: MAX_PARALLEL_TASKS
+              value: "2"
+            - name: RESULTS_DIR
+              value: "/results"
+            - name: MANIFESTS_DIR
+              value: "/manifests"
+            - name: AUDIT_DIR
+              value: "/audit"
+            - name: TEMPLATES_DIR
+              value: "/app/templates"
+          volumeMounts:
+            - name: results
+              mountPath: /results
+            - name: manifests
+              mountPath: /manifests
+            - name: audit
+              mountPath: /audit
+            - name: workspace
+              mountPath: /workspace
+              readOnly: true
+      volumes:
+        - name: results
+          hostPath:
+            path: /home/kratosvil/Desarrollo/agentforge-llm/results
+            type: DirectoryOrCreate
+        - name: manifests
+          hostPath:
+            path: /home/kratosvil/Desarrollo/agentforge-llm/manifests
+            type: DirectoryOrCreate
+        - name: audit
+          hostPath:
+            path: /home/kratosvil/Desarrollo/agentforge-llm/audit
+            type: DirectoryOrCreate
+        - name: workspace
+          hostPath:
+            path: /home/kratosvil/Desarrollo
+            type: Directory

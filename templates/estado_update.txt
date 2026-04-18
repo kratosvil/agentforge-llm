@@ -1,0 +1,24 @@
+CONTEXT:
+You are updating a structured Markdown document with new field values.
+Target file: {target_file}
+
+CURRENT CONTENT:
+{current_content}
+
+UPDATES TO APPLY:
+{updates}
+
+INSTRUCTION:
+Update the document by applying the changes specified in UPDATES TO APPLY.
+
+Rules:
+- Preserve the overall structure and all existing sections
+- Only modify the fields/values specified in UPDATES TO APPLY
+- If a field does not exist, add it in the appropriate section
+- Keep the document concise — readable in 30 seconds
+- Do NOT change the document format or add new sections unless explicitly in UPDATES TO APPLY
+- Update "Ultima sesion" date if present with today's date
+
+OUTPUT FORMAT:
+Output ONLY the complete updated document content. No explanations. No preamble.
+Start directly with the first line of the document.

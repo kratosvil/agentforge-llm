@@ -1,0 +1,42 @@
+CONTEXT:
+You are generating a CLAUDE.md file for a Terraform module.
+CLAUDE.md is the context file that Claude Code reads at the start of each session
+to understand the module without re-reading all .tf files.
+Module: {module_name} | Layer: {layer}
+
+FILES PROVIDED:
+
+main.tf:
+{main_tf_content}
+
+variables.tf:
+{variables_tf_content}
+
+outputs.tf:
+{outputs_tf_content}
+
+metadata.json:
+{metadata_json_content}
+
+INSTRUCTION:
+Generate a CLAUDE.md for this module. Write it AS IF you are briefing a senior engineer
+who has never seen this module but needs to work on it immediately.
+
+Required sections (use these exact headers):
+1. ## Purpose — one paragraph: what problem does this module solve, why does it exist
+2. ## What It Creates — bullet list of resources, be specific (e.g. "ALB with HTTPS listener, target group, security group")
+3. ## Required Inputs — table: variable | type | description (only variables without defaults)
+4. ## Optional Inputs — table: variable | default | description (only variables with defaults)
+5. ## Outputs — table: output | description
+6. ## Usage Example — a minimal but real HCL module block showing required inputs
+7. ## Constraints & Gotchas — bullet list of non-obvious constraints, limits, and things that break if you do them wrong
+8. ## Security Notes — bullet list of security considerations (what is encrypted, what is exposed, IAM scope)
+
+Rules:
+- Be concise — this file must be readable in 90 seconds
+- No generic filler text ("This module is designed to...")
+- The usage example must use realistic values, not placeholder strings
+- Constraints section is the most important — don't skip anything non-obvious
+
+OUTPUT FORMAT:
+Output ONLY valid Markdown. Start directly with the # {module_name} heading.

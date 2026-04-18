@@ -1,0 +1,17 @@
+{
+  "_comment": "Agregar este bloque 'agentforge' dentro de mcpServers en ~/.config/Claude/claude_desktop_config.json",
+  "agentforge": {
+    "command": "python3",
+    "args": ["-m", "agentforge.server"],
+    "cwd": "/home/kratosvil/Desarrollo/agentforge-llm",
+    "env": {
+      "OLLAMA_HOST": "http://localhost:11434",
+      "MODEL_NAME": "qwen2.5-coder:7b",
+      "MAX_PARALLEL_TASKS": "2",
+      "RESULTS_DIR": "/home/kratosvil/Desarrollo/agentforge-llm/results",
+      "MANIFESTS_DIR": "/home/kratosvil/Desarrollo/agentforge-llm/manifests",
+      "AUDIT_DIR": "/home/kratosvil/Desarrollo/agentforge-llm/audit",
+      "TEMPLATES_DIR": "/home/kratosvil/Desarrollo/agentforge-llm/templates"
+    }
+  }
+}

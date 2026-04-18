@@ -1,0 +1,37 @@
+CONTEXT:
+You are reading Terraform module files and generating a metadata.json.
+Module: {module_name} | Version: {version} | Layer: {layer}
+
+FILES PROVIDED:
+
+main.tf:
+{main_tf_content}
+
+variables.tf:
+{variables_tf_content}
+
+outputs.tf:
+{outputs_tf_content}
+
+INSTRUCTION:
+Generate a metadata.json following this EXACT schema. No deviations allowed.
+
+SCHEMA:
+{{
+  "id": "<module_name>",
+  "version": "<version>",
+  "layer": "<organization|platform|product>",
+  "description": "<one line, max 120 chars, what this module creates and for what purpose>",
+  "capabilities": ["<list what AWS/cloud resources this module creates>"],
+  "requires": ["<other module IDs this depends on — use exact IDs, empty array if none>"],
+  "optional": ["<module IDs that enhance but are not required>"],
+  "inputs_required": ["<variable names that have no default — consumer must provide>"],
+  "inputs_optional": ["<variable_name=default_value for variables with defaults>"],
+  "outputs": ["<output names this module exposes>"],
+  "llm_hints": ["<constraints an LLM must know when generating config for this module, e.g. 'vpc_cidr must be /16 to /28'>"],
+  "security_notes": ["<security considerations: encryption defaults, IAM scope, exposure risks>"]
+}}
+
+OUTPUT FORMAT:
+Output ONLY valid JSON. No markdown fences. No explanations. No trailing commas.
+Start directly with the opening brace.

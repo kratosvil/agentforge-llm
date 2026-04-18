@@ -1,0 +1,45 @@
+CONTEXT:
+You are extracting the resource structure from Terraform files.
+Module: {module_name}
+
+TERRAFORM FILES:
+{tf_files_content}
+
+INSTRUCTION:
+Parse the Terraform files and extract all declared resources, data sources, and locals.
+
+OUTPUT SCHEMA:
+{{
+  "module": "<module_name>",
+  "resources": [
+    {{
+      "type": "aws_vpc",
+      "name": "main",
+      "provider": "aws",
+      "attributes": ["cidr_block", "enable_dns_hostnames"]
+    }}
+  ],
+  "data_sources": [
+    {{
+      "type": "aws_availability_zones",
+      "name": "available",
+      "provider": "aws"
+    }}
+  ],
+  "locals": ["local_name_1", "local_name_2"],
+  "modules": [
+    {{
+      "name": "module_call_name",
+      "source": "./modules/networking"
+    }}
+  ]
+}}
+
+Rules:
+- List ALL resources, not just the main ones
+- For attributes, list only the top-level argument names (not nested blocks)
+- provider field: infer from resource type prefix (aws_, azurerm_, google_, etc.)
+- If a block uses count or for_each, still include it once
+
+OUTPUT FORMAT:
+Output ONLY valid JSON. No markdown fences. No explanations.

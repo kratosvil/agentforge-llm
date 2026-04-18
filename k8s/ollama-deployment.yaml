@@ -1,0 +1,58 @@
+# Ollama corriendo como pod en K8s.
+# Los modelos se montan desde el hostPath ~/.ollama para no re-descargar
+# cada vez que el pod reinicia.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: agentforge
+  labels:
+    app: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          ports:
+            - containerPort: 11434
+              name: api
+          resources:
+            requests:
+              memory: "7Gi"
+              cpu: "2"
+            limits:
+              # Deja margen para OS + AgentForge server
+              memory: "9Gi"
+              cpu: "3"
+          env:
+            - name: OLLAMA_HOST
+              value: "0.0.0.0"
+          volumeMounts:
+            - name: ollama-models
+              mountPath: /root/.ollama
+          livenessProbe:
+            httpGet:
+              path: /api/version
+              port: 11434
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/version
+              port: 11434
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: ollama-models
+          hostPath:
+            # Reutiliza modelos ya descargados en el host — evita re-descarga
+            path: /home/kratosvil/.ollama
+            type: DirectoryOrCreate

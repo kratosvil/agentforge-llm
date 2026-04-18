@@ -1,0 +1,22 @@
+CONTEXT:
+You are reading a Terraform main.tf file and generating its outputs.tf.
+Module name: {module_name}
+Layer: {layer}
+
+SOURCE FILE CONTENT:
+{source_file_content}
+
+INSTRUCTION:
+Generate a complete outputs.tf file for this Terraform module.
+
+Rules you MUST follow:
+- Export every resource attribute that a consuming module would realistically need
+- Every output MUST have a description (string)
+- Add sensitive = true on outputs that expose: passwords, private keys, tokens, connection strings
+- Output names must follow pattern: {resource_type}_{attribute} (e.g. vpc_id, alb_dns_name)
+- Do NOT output internal/implementation details that consumers should not depend on
+- Group outputs by resource type
+
+OUTPUT FORMAT:
+Output ONLY valid HCL code. No markdown fences. No explanations.
+Start directly with the first output block.

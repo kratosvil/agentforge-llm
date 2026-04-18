@@ -1,0 +1,27 @@
+CONTEXT:
+You are generating a versions.tf file for a Terraform module.
+Module name: {module_name}
+Layer: {layer}
+
+SOURCE FILE CONTENT (to detect which providers are used):
+{source_file_content}
+
+INSTRUCTION:
+Generate a versions.tf file with terraform and provider version constraints.
+
+Rules you MUST follow:
+- Detect which providers are used by scanning the source file for "resource", "data", "provider" blocks
+- Common provider registry paths:
+    hashicorp/aws     -> registry.terraform.io/hashicorp/aws
+    hashicorp/azurerm -> registry.terraform.io/hashicorp/azurerm
+    hashicorp/google  -> registry.terraform.io/hashicorp/google
+    hashicorp/random  -> registry.terraform.io/hashicorp/random
+    hashicorp/null    -> registry.terraform.io/hashicorp/null
+- Use pessimistic constraint operator (~>) for provider versions
+- Set required_version = ">= 1.5.0" unless context suggests otherwise
+- Use realistic current version ranges (aws ~> 5.0, azurerm ~> 3.0, etc.)
+- Include ONLY providers actually referenced in the source file
+
+OUTPUT FORMAT:
+Output ONLY valid HCL code. No markdown fences. No explanations.
+Start directly with the terraform block.
