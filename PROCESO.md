@@ -222,6 +222,70 @@ agentforge run --plan plans/build-networking-module.json
 
 ---
 
+## Como agregar un nuevo tipo de tarea
+
+El sistema esta disenado para extenderse sin tocar el runtime. Solo 3 pasos:
+
+### Paso 1 — Agregar el subtype en `agentforge/models.py`
+
+```python
+class TaskSubtype(str, Enum):
+    # ... existentes ...
+    DOCKER_COMPOSE = "docker_compose"       # nuevo
+    GITHUB_ACTIONS = "github_actions"       # nuevo
+```
+
+Y registrar la combinacion valida type+subtype:
+
+```python
+valid_combos = {
+    # ... existentes ...
+    TaskType.GENERATE_BOILERPLATE: [
+        TaskSubtype.TERRAFORM_VARIABLES,
+        TaskSubtype.DOCKER_COMPOSE,         # agregar aqui
+    ],
+}
+```
+
+### Paso 2 — Crear el template en `templates/`
+
+Crear `templates/docker_compose.txt` con 3 secciones:
+
+```
+CONTEXT:
+<describe el rol del modelo y el contexto del requerimiento>
+
+INPUT:
+<variables que el handler va a inyectar via .format()>
+
+INSTRUCTION:
+<instrucciones exactas — que generar, reglas, que NO hacer>
+
+OUTPUT FORMAT:
+<formato exacto del output — YAML/JSON/HCL/Markdown, sin fences, etc.>
+```
+
+La clave: ser especifico en INSTRUCTION. Cuanto mas preciso, mejor el output.
+
+### Paso 3 — Registrar en `agentforge/handlers/__init__.py`
+
+```python
+HANDLER_MAP = {
+    # ... existentes ...
+    (TaskType.GENERATE_BOILERPLATE, TaskSubtype.DOCKER_COMPOSE): generate.handle,
+}
+```
+
+Si la logica es muy distinta a los handlers existentes, crear `handlers/docker.py`
+con su propia funcion `handle(manifest)` siguiendo el mismo patron.
+
+### Eso es todo
+
+El MCP Server, orquestador, CLI y sistema de auditoria lo recogen automaticamente.
+Claude puede invocar el nuevo tipo con `agentforge_execute` sin ningun cambio adicional.
+
+---
+
 ## Roadmap v2: multi-host LAN
 
 El sistema ya esta preparado para v2. Solo requiere:
