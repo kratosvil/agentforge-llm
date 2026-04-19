@@ -42,6 +42,7 @@ from agentforge.orchestrator import execute_batch, execute_task, get_task_status
 from agentforge.utils import (
     list_pending_review, mark_reviewed, read_audit, read_output_content,
 )
+from agentforge.md_parser import parse_requirements_md
 
 mcp = FastMCP(
     name="agentforge",
@@ -160,8 +161,8 @@ async def agentforge_audit(
     return {
         "task_id": task_id,
         "status": record.status.value,
-        "type": record.manifest.task.type.value,
-        "subtype": record.manifest.task.subtype.value,
+        "type": record.manifest.task.type,
+        "subtype": record.manifest.task.subtype,
         "output_content": output_content,
         "validation": {
             "passed": record.validation.passed if record.validation else None,
@@ -222,7 +223,58 @@ async def agentforge_batch(
 
 
 # ---------------------------------------------------------------------------
-# Tool 5: Health check
+# Tool 5: Ejecutar desde archivo .md de requerimientos
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+async def agentforge_from_md(
+    md_file: str,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """
+    Lee un archivo .md de requerimientos y ejecuta la tarea definida en él.
+
+    El .md debe tener frontmatter YAML con: type, subtype, format.
+    El cuerpo del documento se usa como descripción del requerimiento.
+
+    Args:
+        md_file: Ruta absoluta o relativa al archivo .md.
+        dry_run: Si True, solo parsea y retorna el manifest sin ejecutar.
+
+    Returns:
+        Si dry_run=False: resultado de ejecución igual a agentforge_execute.
+        Si dry_run=True: el manifest que se habría ejecutado.
+
+    Ejemplo de archivo .md:
+        ---
+        type: generate_code
+        subtype: python_class
+        format: python
+        timeout: 180
+        ---
+
+        Genera una clase Python LRUCache con genéricos, capacity property,
+        métodos get/put/delete/clear y dunder methods __len__, __contains__, __repr__.
+    """
+    try:
+        manifest_dict = parse_requirements_md(md_file)
+    except (FileNotFoundError, ValueError) as e:
+        return {"error": str(e), "status": "failed"}
+
+    if dry_run:
+        return {"status": "dry_run", "manifest": manifest_dict}
+
+    try:
+        m = ExecutionManifest.model_validate(manifest_dict)
+    except Exception as e:
+        return {"error": f"Manifest inválido: {e}", "status": "failed"}
+
+    record = await execute_task(m)
+    return _record_to_response(record)
+
+
+# ---------------------------------------------------------------------------
+# Tool 6: Health check
 # ---------------------------------------------------------------------------
 
 @mcp.tool()
@@ -239,7 +291,7 @@ async def agentforge_health() -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# Tool 6: Listar tareas pendientes de revision
+# Tool 7: Listar tareas pendientes de revision
 # ---------------------------------------------------------------------------
 
 @mcp.tool()

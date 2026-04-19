@@ -11,17 +11,17 @@ Flujo:
   4. Retorna el codigo generado y el nombre del archivo de output
 """
 
-from agentforge.models import ExecutionManifest, TaskSubtype
+from agentforge.models import ExecutionManifest
 from agentforge.ollama.client import run_prompt
 from agentforge.config import TEMPLATES_DIR
 
 
 TEMPLATE_MAP = {
-    TaskSubtype.PYTHON_FUNCTION: "python_function.txt",
+    "python_function": "python_function.txt",
 }
 
 OUTPUT_FILENAME_MAP = {
-    TaskSubtype.PYTHON_FUNCTION: "output.py",
+    "python_function": "output.py",
 }
 
 

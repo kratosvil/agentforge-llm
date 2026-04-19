@@ -18,37 +18,8 @@ from pydantic import BaseModel, Field, model_validator
 
 
 # ---------------------------------------------------------------------------
-# Enums — tipos de tarea soportados en v1.0
+# Enums internos — estado y comportamiento del sistema (no expuestos al usuario)
 # ---------------------------------------------------------------------------
-
-class TaskType(str, Enum):
-    GENERATE_BOILERPLATE = "generate_boilerplate"
-    GENERATE_METADATA = "generate_metadata"
-    GENERATE_DOCUMENTATION = "generate_documentation"
-    ANALYZE_SECURITY = "analyze_security"
-    UPDATE_DOCUMENT = "update_document"
-    EXTRACT_STRUCTURE = "extract_structure"
-    GENERATE_CODE = "generate_code"
-
-
-class TaskSubtype(str, Enum):
-    # generate_boilerplate
-    TERRAFORM_VARIABLES = "terraform_variables"
-    TERRAFORM_OUTPUTS = "terraform_outputs"
-    TERRAFORM_VERSIONS = "terraform_versions"
-    # generate_metadata
-    MODULE_METADATA_JSON = "module_metadata_json"
-    # generate_documentation
-    MODULE_CLAUDE_MD = "module_claude_md"
-    # analyze_security
-    TFSEC_REPORT = "tfsec_report"
-    # update_document
-    ESTADO_MD = "estado_md"
-    # extract_structure
-    TF_RESOURCES = "tf_resources"
-    # generate_code
-    PYTHON_FUNCTION = "python_function"
-
 
 class TaskStatus(str, Enum):
     QUEUED = "queued"
@@ -68,35 +39,16 @@ class OnFailure(str, Enum):
 # ---------------------------------------------------------------------------
 
 class TaskDefinition(BaseModel):
-    """Define el tipo y comportamiento de la tarea."""
-    type: TaskType
-    subtype: TaskSubtype
+    """Define el tipo y comportamiento de la tarea.
+
+    type y subtype son strings libres — el sistema acepta cualquier valor.
+    Si existe templates/{subtype}.txt se usa ese template.
+    Si no existe, se usa input.description directamente como prompt.
+    """
+    type: str                              # generate_code, generate_boilerplate, cualquier string
+    subtype: str                           # python_class, docker_compose, github_actions, etc.
     priority: str = "normal"
     timeout_seconds: int = Field(default=300, ge=30, le=1800)
-
-    @model_validator(mode="after")
-    def validate_type_subtype_combo(self) -> "TaskDefinition":
-        """Asegura que el subtype corresponde al type declarado."""
-        valid_combos: dict[TaskType, list[TaskSubtype]] = {
-            TaskType.GENERATE_BOILERPLATE: [
-                TaskSubtype.TERRAFORM_VARIABLES,
-                TaskSubtype.TERRAFORM_OUTPUTS,
-                TaskSubtype.TERRAFORM_VERSIONS,
-            ],
-            TaskType.GENERATE_METADATA: [TaskSubtype.MODULE_METADATA_JSON],
-            TaskType.GENERATE_DOCUMENTATION: [TaskSubtype.MODULE_CLAUDE_MD],
-            TaskType.ANALYZE_SECURITY: [TaskSubtype.TFSEC_REPORT],
-            TaskType.UPDATE_DOCUMENT: [TaskSubtype.ESTADO_MD],
-            TaskType.EXTRACT_STRUCTURE: [TaskSubtype.TF_RESOURCES],
-            TaskType.GENERATE_CODE: [TaskSubtype.PYTHON_FUNCTION],
-        }
-        allowed = valid_combos.get(self.type, [])
-        if self.subtype not in allowed:
-            raise ValueError(
-                f"Subtype '{self.subtype}' no es valido para type '{self.type}'. "
-                f"Permitidos: {[s.value for s in allowed]}"
-            )
-        return self
 
 
 class InputDefinition(BaseModel):
@@ -104,7 +56,8 @@ class InputDefinition(BaseModel):
     source_files: list[str] = Field(default_factory=list)
     module_name: str = ""
     layer: str = ""                        # organization | platform | product
-    description: str = ""                  # prompt libre para tareas generate_code
+    description: str = ""                  # prompt principal de la tarea
+    context: str = ""                      # output previo para encadenar generaciones
     additional_context: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")

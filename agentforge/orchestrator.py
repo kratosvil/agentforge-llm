@@ -27,6 +27,7 @@ from agentforge.utils import (
     write_validation, write_audit, run_validation,
     log_task_start, log_task_end, log_error,
 )
+from agentforge.utils.validator import run_builtin_validation
 from agentforge.utils.perf_monitor import PerfMonitor
 
 # Semaforo global — controla cuantas tareas Ollama corren en paralelo
@@ -65,7 +66,7 @@ async def execute_task(manifest: ExecutionManifest) -> AuditRecord:
     write_manifest(task_id, manifest)
     write_audit(task_id, record)
 
-    log_task_start(task_id, manifest.task.type.value, manifest.task.subtype.value)
+    log_task_start(task_id, manifest.task.type, manifest.task.subtype)
 
     # Adquirir slot de concurrencia — bloquea aqui si ya hay MAX_PARALLEL_TASKS corriendo
     async with _semaphore:
@@ -94,8 +95,16 @@ async def execute_task(manifest: ExecutionManifest) -> AuditRecord:
             write_raw_output(task_id, output_content)
             write_output_file(task_id, output_filename, output_content)
 
-            # Correr validacion automatica
-            validation_result = await run_validation(manifest.validation, task_id)
+            # Validacion built-in segun formato (Python syntax, JSON parse)
+            # Si pasa, corre el comando externo si esta configurado
+            builtin = run_builtin_validation(output_content, manifest.output.format)
+            if builtin is not None and not builtin.passed:
+                validation_result = builtin
+            else:
+                validation_result = await run_validation(manifest.validation, task_id)
+                # Si el built-in paso pero el externo no tiene command, usar el built-in
+                if builtin is not None and not manifest.validation.command:
+                    validation_result = builtin
             write_validation(task_id, validation_result)
 
             # Determinar estado final

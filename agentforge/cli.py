@@ -114,7 +114,7 @@ def audit(task_id: str):
         return
 
     console.rule(f"[bold]Tarea {task_id[:8]}...[/bold]")
-    console.print(f"Tipo:     [cyan]{record.manifest.task.type.value}[/cyan] / {record.manifest.task.subtype.value}")
+    console.print(f"Tipo:     [cyan]{record.manifest.task.type}[/cyan] / {record.manifest.task.subtype}")
     console.print(f"Estado:   [{'green' if record.status.value == 'completed' else 'red'}]{record.status.value}[/]")
     console.print(f"Duracion: {record.duration_seconds:.1f}s" if record.duration_seconds else "Duracion: —")
 

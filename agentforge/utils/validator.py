@@ -10,9 +10,57 @@ Por que validar automaticamente:
   - El error exacto del validador se incluye en audit.json para re-prompting
 """
 
+import ast
 import asyncio
+import json as json_module
 
 from agentforge.models import ValidationDefinition, ValidationResult
+
+
+def run_builtin_validation(content: str, output_format: str) -> ValidationResult | None:
+    """
+    Valida el contenido usando validadores built-in segun el formato de output.
+
+    Corre sincrónicamente antes de cualquier comando externo.
+    Retorna None si no hay validador built-in para el formato dado.
+    """
+    if output_format == "python":
+        try:
+            ast.parse(content)
+            return ValidationResult(
+                command="ast.parse",
+                exit_code=0,
+                stdout="Syntax OK",
+                stderr="",
+                passed=True,
+            )
+        except SyntaxError as e:
+            return ValidationResult(
+                command="ast.parse",
+                exit_code=1,
+                stdout="",
+                stderr=f"SyntaxError: {e}",
+                passed=False,
+            )
+    elif output_format == "json":
+        try:
+            json_module.loads(content)
+            return ValidationResult(
+                command="json.loads",
+                exit_code=0,
+                stdout="Valid JSON",
+                stderr="",
+                passed=True,
+            )
+        except json_module.JSONDecodeError as e:
+            return ValidationResult(
+                command="json.loads",
+                exit_code=1,
+                stdout="",
+                stderr=f"JSONDecodeError: {e}",
+                passed=False,
+            )
+    return None
 
 
 async def run_validation(

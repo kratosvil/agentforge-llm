@@ -14,23 +14,21 @@ Flujo:
 
 from pathlib import Path
 
-from agentforge.models import ExecutionManifest, TaskSubtype
+from agentforge.models import ExecutionManifest
 from agentforge.ollama.client import run_prompt
 from agentforge.config import TEMPLATES_DIR
 
 
-# Mapeo subtype -> nombre del archivo template
 TEMPLATE_MAP = {
-    TaskSubtype.TERRAFORM_VARIABLES: "terraform_variables.txt",
-    TaskSubtype.TERRAFORM_OUTPUTS: "terraform_outputs.txt",
-    TaskSubtype.TERRAFORM_VERSIONS: "terraform_versions.txt",
+    "terraform_variables": "terraform_variables.txt",
+    "terraform_outputs": "terraform_outputs.txt",
+    "terraform_versions": "terraform_versions.txt",
 }
 
-# Nombre del archivo de output que se escribira en results/{task_id}/output/
 OUTPUT_FILENAME_MAP = {
-    TaskSubtype.TERRAFORM_VARIABLES: "variables.tf",
-    TaskSubtype.TERRAFORM_OUTPUTS: "outputs.tf",
-    TaskSubtype.TERRAFORM_VERSIONS: "versions.tf",
+    "terraform_variables": "variables.tf",
+    "terraform_outputs": "outputs.tf",
+    "terraform_versions": "versions.tf",
 }
 
 

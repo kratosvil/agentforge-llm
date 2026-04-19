@@ -102,8 +102,8 @@ def list_pending_review() -> list[dict]:
             if record.status.value == "completed" and not record.claude_reviewed:
                 pending.append({
                     "task_id": record.task_id,
-                    "type": record.manifest.task.type.value,
-                    "subtype": record.manifest.task.subtype.value,
+                    "type": record.manifest.task.type,
+                    "subtype": record.manifest.task.subtype,
                     "status": record.status.value,
                     "duration_seconds": record.duration_seconds,
                     "output_path": str(task_dir / "output"),
