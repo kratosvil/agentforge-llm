@@ -1,217 +1,222 @@
-# AgentForge LLM
+# AgentForge-LLM
 
-> Orchestrate mechanical development tasks via a local LLM, reducing Claude Code token consumption by ~42% through async task delegation and parallelization.
+Orchestrates a local LLM (Ollama + codellama:13b) via MCP to execute mechanical code generation tasks in the background, freeing Claude's context window for high-level reasoning.
 
-## Overview
-
-AgentForge LLM is a **Model Context Protocol (MCP) Server** that sits between Claude Code and a locally-running Ollama instance. Claude acts as architect and auditor; the local LLM (`qwen2.5-coder:7b`) handles repetitive code generation tasks autonomously.
+## How it works
 
 ```
-Claude Code (architect + auditor)
-        │  MCP tool calls
-        ▼
-AgentForge MCP Server  (this project)
-        │  HTTP REST
-        ▼
-Ollama API  →  qwen2.5-coder:7b (local inference)
-        │
-        ▼
-/results/{task_id}/  →  Claude reviews and approves
+Claude Code (architect)
+    │  agentforge_execute(manifest)   → {task_id, status:"queued"}  <1s
+    │
+    ▼
+AgentForge MCP Server (Python + fastmcp)
+    │  async fire-and-forget via asyncio.create_task()
+    │
+    ▼
+Ollama (codellama:13b)   ← RTX 2070 / LAN node
+    │  results/ written locally
+    ▼
+agentforge_audit(task_id)   ← Claude reviews when ready
 ```
 
-## Key Features
+**Key benefit:** Claude generates a manifest, fires it, and continues working. The 150–500 tokens of boilerplate output never enter Claude's context — Ollama handles them locally.
 
-- **6 MCP tools** exposed to Claude: `execute`, `batch`, `status`, `audit`, `pending`, `health`
-- **8 task types**: Terraform boilerplate (variables/outputs/versions), metadata.json, CLAUDE.md, security analysis, document update, resource extraction
-- **Async parallelism**: up to N tasks running concurrently via `asyncio.Semaphore`
-- **Automatic validation**: runs `terraform validate`, JSON schema checks, etc. after each task
-- **Full audit trail**: every task writes `manifest.json`, `raw_llm_output.txt`, `validation.json`, `audit.json`
-- **CLI for review**: `agentforge pending`, `audit`, `approve`, `reject`, `run --plan`
-- **Kubernetes-ready**: manifests for Ollama + AgentForge pods included
+## Architecture
 
-## Stack
+```
+Linux PC (orchestrator)              Windows 192.168.128.4 (inference)
+────────────────────────             ──────────────────────────────────
+Claude Code CLI                      Ollama :11434
+AgentForge MCP (stdio)  →LAN→       codellama:13b (~7.4 GB VRAM)
+results/ directory                   Ryzen 7 5700 / 32 GB RAM
+```
 
-| Layer | Technology |
-|-------|-----------|
-| MCP Server | [fastmcp](https://github.com/jlowin/fastmcp) |
-| HTTP client | httpx (async) |
-| Data validation | Pydantic v2 |
-| CLI | Click + Rich |
-| Local LLM | Ollama + qwen2.5-coder:7b |
-| Container orchestration | Kubernetes (Minikube for local) |
-
-## Quick Start
-
-### Prerequisites
+## Requirements
 
 - Python 3.11+
-- [Ollama](https://ollama.com) installed and running
-- `qwen2.5-coder:7b` model pulled
+- [Ollama](https://ollama.com) running locally or on a LAN node
+- `codellama:13b` pulled: `ollama pull codellama:13b`
+- Claude Code CLI
 
-```bash
-# Install Ollama
-curl -fsSL https://ollama.com/install.sh | sh
-
-# Pull the model (~4.7 GB)
-ollama pull qwen2.5-coder:7b
-```
-
-### Install
+## Installation
 
 ```bash
 git clone https://github.com/kratosvil/agentforge-llm
 cd agentforge-llm
-
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e .
-
-cp .env.example .env
+pip install -r requirements.txt
 ```
-
-### Verify
-
-```bash
-agentforge health
-# Ollama OK — version X.X.X
-# Model qwen2.5-coder:7b available: YES
-```
-
-### Connect to Claude Desktop
-
-Add to `~/.config/Claude/claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "agentforge": {
-      "command": "python3",
-      "args": ["-m", "agentforge.server"],
-      "cwd": "/path/to/agentforge-llm",
-      "env": {
-        "OLLAMA_HOST": "http://localhost:11434",
-        "MODEL_NAME": "qwen2.5-coder:7b"
-      }
-    }
-  }
-}
-```
-
-See `mcp-config-snippet.json` for the full snippet with all environment variables.
-
-## Usage
-
-### Via Claude Code (MCP)
-
-```python
-# Check agent is ready
-agentforge_health()
-
-# Delegate a task
-agentforge_execute({
-  "task": {"type": "generate_boilerplate", "subtype": "terraform_variables"},
-  "input": {
-    "source_files": ["/path/to/module/main.tf"],
-    "module_name": "networking",
-    "layer": "platform"
-  },
-  "output": {"path": "./results/{task_id}/variables.tf", "format": "hcl"},
-  "validation": {"command": "terraform validate", "working_dir": "./results/{task_id}/output/"}
-})
-# → {task_id, status, duration_seconds, output_path}
-
-# Review and approve
-agentforge_audit(task_id="<uuid>", approve=True)
-```
-
-### Via CLI
-
-```bash
-# List tasks waiting for review
-agentforge pending
-
-# Review a specific task
-agentforge audit <task_id>
-
-# Approve / reject
-agentforge approve <task_id>
-agentforge reject <task_id> --reason "Missing validation blocks"
-
-# Run a full plan
-agentforge run --plan plans/build-networking-module.json
-```
-
-## Supported Task Types
-
-| Type | Subtype | Input | Output | Validation |
-|------|---------|-------|--------|-----------|
-| `generate_boilerplate` | `terraform_variables` | main.tf | variables.tf | terraform validate |
-| `generate_boilerplate` | `terraform_outputs` | main.tf | outputs.tf | terraform validate |
-| `generate_boilerplate` | `terraform_versions` | main.tf | versions.tf | terraform validate |
-| `generate_metadata` | `module_metadata_json` | *.tf files | metadata.json | JSON parse |
-| `generate_documentation` | `module_claude_md` | *.tf + metadata | CLAUDE.md | — |
-| `analyze_security` | `tfsec_report` | *.tf files | tfsec_report.json | JSON parse |
-| `update_document` | `estado_md` | existing doc | updated doc | — |
-| `extract_structure` | `tf_resources` | *.tf files | resources.json | JSON parse |
 
 ## Configuration
 
-All configuration is via environment variables (copy `.env.example` to `.env`):
+All settings via environment variables (defaults in `agentforge/config.py`):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OLLAMA_HOST` | `http://localhost:11434` | Ollama API endpoint |
-| `MODEL_NAME` | `qwen2.5-coder:7b` | Model to use for inference |
-| `MAX_PARALLEL_TASKS` | `2` | Max concurrent Ollama calls |
-| `TASK_TIMEOUT_SECONDS` | `300` | Per-task timeout (5 min) |
-| `LLM_TEMPERATURE` | `0.1` | Low temperature = deterministic code output |
+| `OLLAMA_HOST` | `http://localhost:11434` | Ollama endpoint — override for LAN |
+| `MODEL_NAME` | `codellama:13b` | Ollama model |
+| `MAX_PARALLEL_TASKS` | `1` | Concurrency (RTX 2070 8GB → keep at 1) |
+| `LLM_MAX_TOKENS` | `4096` | Max tokens per generation |
+| `LLM_TEMPERATURE` | `0.1` | Low = deterministic output |
+| `TASK_TIMEOUT_SECONDS` | `300` | Default task timeout |
 
-## Performance (target hardware: i7-3537U / 15.5 GB RAM / CPU-only)
-
-| Metric | Baseline (Claude only) | With AgentForge |
-|--------|----------------------|-----------------|
-| Claude tokens per TF module | ~60,000 | ~35,000 (−42%) |
-| Active Claude session time | ~45 min | ~20 min (−55%) |
-| Modules built per session | 1 | 2–3 (parallel) |
-
-## Kubernetes Deployment
+## Register as MCP server
 
 ```bash
-# Apply all manifests
-kubectl apply -f k8s/namespace.yaml
-kubectl apply -f k8s/ollama-deployment.yaml
-kubectl apply -f k8s/ollama-service.yaml
+# Override OLLAMA with your LAN IP if needed:
+OLLAMA=http://192.168.128.4:11434 make mcp-register
 
-# Build and deploy AgentForge
-docker build -t agentforge-server:latest -f k8s/Dockerfile .
-kubectl apply -f k8s/agentforge-deployment.yaml
+# Verify registration
+make mcp-status
 ```
 
-## Project Structure
+Open a **new** Claude Code session after registering. The MCP server spawns fresh each session.
+
+## MCP Tools
+
+### `agentforge_health`
+Check Ollama connectivity and model availability.
+
+### `agentforge_execute(manifest)`
+Queue a task. Returns `{task_id, status: "queued"}` in <1s — never blocks.
+
+### `agentforge_status(task_id)`
+Poll task state: `"running" | "completed" | "failed"`.
+
+### `agentforge_pending()`
+List completed tasks not yet reviewed by Claude.
+
+### `agentforge_audit(task_id, approve=None|True|False)`
+Read output and optionally record approval. `None` = read only.
+
+### `agentforge_batch(manifests)`
+Queue multiple tasks at once. Returns list of task_ids immediately.
+
+## Execution Manifest
+
+```python
+{
+    "task": {
+        "type": "generate_code",        # or generate_boilerplate
+        "subtype": "python_class",
+        "timeout_seconds": 90
+    },
+    "input": {
+        "source_files": [],
+        "module_name": "user_repository",
+        "description": "Write a Python UserRepository class with CRUD methods: create(user_dict), get_by_id(id), get_all(), update(id, data), delete(id). In-memory dict storage."
+    },
+    "output": {
+        "path": "/tmp/output/user_repo.py",
+        "format": "python"
+    }
+}
+```
+
+## Supported subtypes & timeouts
+
+| Subtype | Timeout | Notes |
+|---------|---------|-------|
+| `python_function` | 60s | Fast, reliable |
+| `python_class` simple | 90s | Patterns, CRUD |
+| `python_class` complex | 240s | Review algorithm logic |
+| `python_unittest` | 60s | Verify expected values |
+| `bash_script` | 90s | Give exact command spec |
+| `terraform_module` | 150s | Review env/lifecycle blocks |
+| `k8s_manifest` | 120s | Review API versions |
+| `sql_schema` | 150s | Prefix spec with "GENERATE NEW" |
+| `readme` | 200s | Heavy review — hallucinates details |
+
+## Async workflow
+
+```python
+# 1. Fire (non-blocking)
+task = agentforge_execute(manifest)        # <1s → {task_id, status:"queued"}
+
+# 2. Keep working on other things...
+
+# 3. Check status when convenient
+agentforge_status(task["task_id"])         # "running" | "completed"
+
+# 4. Review completed work
+agentforge_pending()                       # see what finished
+agentforge_audit(task_id, approve=None)    # read output
+
+# 5. Approve or reject
+agentforge_audit(task_id, approve=True)    # mark reviewed ✓
+agentforge_audit(task_id, approve=False)   # reject → re-queue with corrections
+```
+
+## Known model bugs (codellama:13b)
+
+| Context | Bug | Fix |
+|---------|-----|-----|
+| Terraform Lambda | `environment = var.env` | `environment { variables = var.env }` |
+| K8s HPA | `autoscaling/v2beta1` | `autoscaling/v2` |
+| K8s Deployment | `image: var IMAGE` literal | replace with real image |
+| SQL spec | treats description as broken code | prefix "GENERATE NEW ... from scratch" |
+| Bash curl | `curl \| grep "HTTP/2 200"` | `curl -o /dev/null -s -w '%{http_code}'` |
+| Complex algorithms | Dijkstra → BFS without heapq | verify algorithm logic |
+| BST delete (2 children) | successor not detached from subtree | check manually |
+
+## Delegation rule
+
+**Tasks >40 lines of output → delegate to AgentForge.**
+Below that threshold, the manifest overhead costs as much as generating directly.
+
+| Task | Claude direct | Via AgentForge | Saving |
+|------|--------------|----------------|--------|
+| Function <30 lines | ~$0.014 | ~$0.014 | ~0% |
+| Class 50 lines | ~$0.024 | ~$0.014 | ~40% |
+| Class 150 lines | ~$0.048 | ~$0.017 | ~65% |
+| Session (10 modules) | ~$0.225 | ~$0.052 | ~77% |
+
+## Benchmark
+
+| Subtype | Pass rate (rounds 1+2) | Notes |
+|---------|----------------------|-------|
+| python_function | 100% | |
+| python_class simple/medium | ~100% | |
+| python_class complex | ~70% | logic bugs in algorithms |
+| bash_script | 70% | needs command guidance |
+| terraform_module | 100% | structural bugs present |
+| k8s_manifest | 100% | deprecated API versions |
+| sql_schema | 100% | |
+| python_unittest | 50% | math errors in assertions |
+| readme | 0% | not usable without heavy rewrite |
+
+10-cycle benchmark (100 tasks) in progress — results in `docs/benchmark_cycles_tracking.json`.
+
+## Project structure
 
 ```
 agentforge-llm/
 ├── agentforge/
-│   ├── server.py          # MCP Server (fastmcp) — 6 tools
-│   ├── orchestrator.py    # Async task executor with concurrency control
-│   ├── models.py          # Pydantic models: manifest, audit, batch
-│   ├── config.py          # Central configuration from env vars
-│   ├── cli.py             # CLI (click + rich)
-│   ├── ollama/            # Async Ollama HTTP client
-│   ├── handlers/          # One handler per task type
-│   └── utils/             # Results storage, validator, logger
-├── templates/             # 8 LLM prompt templates
-├── k8s/                   # Kubernetes manifests + Dockerfile
-├── plans/                 # Example execution plans
-└── results/               # Task outputs (gitignored)
+│   ├── server.py          MCP server — 6 tools, async fire-and-forget
+│   ├── orchestrator.py    async task queue + PerfMonitor
+│   ├── config.py          env-based config with safe defaults
+│   ├── models.py          Pydantic models
+│   ├── cli.py             click+rich CLI
+│   ├── handlers/          7 task handlers
+│   ├── ollama/client.py   httpx async (num_ctx=4096)
+│   └── utils/             results, validator, logger, perf_monitor
+├── templates/             8 prompt templates
+├── k8s/                   Kubernetes manifests (Sprint 2)
+├── docs/
+│   ├── codellama13b_capability_map.md
+│   └── benchmark_cycles_tracking.json
+├── PROCESO.md
+└── Makefile
 ```
 
 ## Roadmap
 
-- [x] v0.1.0 — MCP Server + 8 task types + CLI + K8s manifests
-- [ ] v0.2.0 — Multi-host LAN: delegate to RTX 2070 node via `OLLAMA_HOST`
-- [ ] v0.3.0 — Task dependency graph (DAG) for ordered plan execution
-- [ ] v1.0.0 — Production-grade: metrics, retry logic, model fallback
+| Sprint | Status | |
+|--------|--------|-|
+| 1 | Done | Generic manifest system, universal handler |
+| 1.1 | Done | codellama:13b, async fire-and-forget, benchmark |
+| 2 | Pending | HTTP+SSE remote + API key auth (multi-client) |
 
 ## License
 

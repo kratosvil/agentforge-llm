@@ -1,0 +1,178 @@
+{
+  "benchmark_version": "2.0",
+  "date": "2026-04-20",
+  "model": "codellama:13b",
+  "hardware": "RTX 2070 8GB VRAM, Ryzen 7 5700, 32GB RAM",
+  "total_cycles": 10,
+  "tasks_per_cycle": 10,
+  "total_tasks": 100,
+  "subtypes_per_cycle": [
+    "python_function (simple)",
+    "python_function (medium)",
+    "python_class_simple (design pattern)",
+    "python_class_medium (data structure)",
+    "python_class_complex (algorithm)",
+    "python_unittest",
+    "bash_script",
+    "terraform_module",
+    "k8s_manifest",
+    "sql_schema"
+  ],
+  "cycles": {
+    "c01": {
+      "tasks": [
+        {"task_id": "f3ca8928-744a-4f11-984f-76eaa7173e1c", "subtype": "python_function", "name": "merge_sort"},
+        {"task_id": "adac8793-d333-45df-b8e4-3c286aab3775", "subtype": "python_function", "name": "datetime_utils"},
+        {"task_id": "86df8228-9d61-49ec-87d7-7393add95a2a", "subtype": "python_class_simple", "name": "strategy_discount"},
+        {"task_id": "1d81b8f7-a6cc-404a-b49c-b5657e73a499", "subtype": "python_class_medium", "name": "priority_queue"},
+        {"task_id": "f4e55a09-108d-4c1b-820e-a37fa609c2a7", "subtype": "python_class_complex", "name": "graph_dijkstra"},
+        {"task_id": "881f8207-a6fa-442a-8849-2a6892e3ff46", "subtype": "python_unittest", "name": "test_merge_sort"},
+        {"task_id": "baa261e2-7997-4cee-9499-9924c9cca7e3", "subtype": "bash_script", "name": "log_rotation"},
+        {"task_id": "fea453b7-3ebe-4497-98cf-ab812ee44b14", "subtype": "terraform_module", "name": "s3_bucket"},
+        {"task_id": "aa48d7cf-cae2-45ee-9d10-addda19adfff", "subtype": "k8s_manifest", "name": "statefulset_app"},
+        {"task_id": "060cc1a6-e153-4c07-a6b8-55df56f139ef", "subtype": "sql_schema", "name": "blog_schema"}
+      ]
+    },
+    "c02": {
+      "tasks": [
+        {"task_id": "814849b4-8243-4585-b516-2b2073bf4abb", "subtype": "python_function", "name": "quicksort"},
+        {"task_id": "7dedd387-b8a0-4ec0-b4ae-1f86fb5386e7", "subtype": "python_function", "name": "string_ops"},
+        {"task_id": "0daaf32e-efb7-42b3-9e4a-6c0c5f28029c", "subtype": "python_class_simple", "name": "decorator_logging"},
+        {"task_id": "198347ea-f7b3-4535-a99f-37c3bd0aa17d", "subtype": "python_class_medium", "name": "stack_min"},
+        {"task_id": "0c5d4815-9242-4427-a0d9-724ce3c6075e", "subtype": "python_class_complex", "name": "avl_tree"},
+        {"task_id": "6c9b903e-432f-4c03-abf5-c8121df3d8ca", "subtype": "python_unittest", "name": "test_stack_min"},
+        {"task_id": "4a66741b-9787-465e-8d25-c0f287a8ee07", "subtype": "bash_script", "name": "disk_monitor"},
+        {"task_id": "0dc9bb45-44b5-46c8-8db6-338b7392669c", "subtype": "terraform_module", "name": "rds_mysql"},
+        {"task_id": "e43aff15-6153-46fc-a6b0-cf370c94b192", "subtype": "k8s_manifest", "name": "cronjob_configmap"},
+        {"task_id": "fe828275-f7de-44f4-b39f-7d6388b13cf9", "subtype": "sql_schema", "name": "inventory_schema"}
+      ]
+    },
+    "c03": {
+      "tasks": [
+        {"task_id": "bea07736-e4fc-4668-a383-f443f283a07c", "subtype": "python_function", "name": "list_utils"},
+        {"task_id": "e0fa3623-db65-4583-b80f-14025fa1065d", "subtype": "python_function", "name": "roman_numerals"},
+        {"task_id": "0a613e38-72c3-4fe8-9410-159ab96b8371", "subtype": "python_class_simple", "name": "command_pattern"},
+        {"task_id": "1856ca9e-9620-45a5-aa49-3a8780cd69e9", "subtype": "python_class_medium", "name": "lru_cache"},
+        {"task_id": "5e041df3-40aa-4719-be93-72774fc861a6", "subtype": "python_class_complex", "name": "trie"},
+        {"task_id": "63d3cdc4-b4a7-4424-8a51-aad14fec022b", "subtype": "python_unittest", "name": "test_lru_cache"},
+        {"task_id": "a39433ed-5536-4d9a-a256-43c3fa88c89e", "subtype": "bash_script", "name": "backup_script"},
+        {"task_id": "be06a9d2-76c5-4bf3-bf6e-ffb0d9ae5953", "subtype": "terraform_module", "name": "vpc_subnets"},
+        {"task_id": "4d615704-f576-49bb-946c-dc4dc3e6b4ca", "subtype": "k8s_manifest", "name": "ingress_tls"},
+        {"task_id": "4fb3be25-c668-4160-ade2-343cf252d660", "subtype": "sql_schema", "name": "elearning_schema"}
+      ]
+    },
+    "c04": {
+      "tasks": [
+        {"task_id": "38bb62e6-de27-4561-8736-4320d9169c68", "subtype": "python_function", "name": "matrix_ops"},
+        {"task_id": "93e7d6c2-c111-407d-a44d-980b12b0f56d", "subtype": "python_function", "name": "word_frequency"},
+        {"task_id": "aecf9fa7-201a-43ec-ac07-01639a83e10c", "subtype": "python_class_simple", "name": "query_builder"},
+        {"task_id": "963472e8-87e2-4bdd-a234-2add1f7c2a39", "subtype": "python_class_medium", "name": "connection_pool"},
+        {"task_id": "c1858523-5252-44da-999d-cee34e0b84e4", "subtype": "python_class_complex", "name": "hash_table"},
+        {"task_id": "6fe2df13-3206-4401-ba95-654b8327d6d4", "subtype": "python_unittest", "name": "test_query_builder"},
+        {"task_id": "95594ec7-95f3-4dd6-b078-040000a5b43d", "subtype": "bash_script", "name": "process_monitor"},
+        {"task_id": "aad1fd9a-b953-4419-9226-d00c27e34d41", "subtype": "terraform_module", "name": "ecs_cluster"},
+        {"task_id": "719b0dc6-c982-4a57-aed4-080169968953", "subtype": "k8s_manifest", "name": "rbac_setup"},
+        {"task_id": "454efee9-f80c-4918-9baa-5396ffb6fac8", "subtype": "sql_schema", "name": "hospital_schema"}
+      ]
+    },
+    "c05": {
+      "tasks": [
+        {"task_id": "7d37dc76-8277-4581-b1e2-a8d0572682fd", "subtype": "python_function", "name": "two_sum"},
+        {"task_id": "b8deaeda-df72-4a29-bf26-ea56abc7675d", "subtype": "python_function", "name": "validators"},
+        {"task_id": "b3877182-7ad3-4bb8-82c1-fa7a82c62f21", "subtype": "python_class_simple", "name": "proxy_cache"},
+        {"task_id": "3223f106-1d38-43c8-a3a5-702bd09ff555", "subtype": "python_class_medium", "name": "rate_limiter"},
+        {"task_id": "9558fc18-e46b-4ed2-8dd5-df32bb856185", "subtype": "python_class_complex", "name": "segment_tree"},
+        {"task_id": "94aa107c-c6a1-4e95-beb4-bfd05ef3620c", "subtype": "python_unittest", "name": "test_rate_limiter"},
+        {"task_id": "fc3e0c91-209c-40dc-91a1-5f634f3ee681", "subtype": "bash_script", "name": "ssl_checker"},
+        {"task_id": "e557bcf6-8d4b-41fd-9e66-59044c6acc9a", "subtype": "terraform_module", "name": "cloudwatch_sns"},
+        {"task_id": "9cf032cb-52b1-4163-9b05-3d2f33500349", "subtype": "k8s_manifest", "name": "network_policy"},
+        {"task_id": "eba13b9b-40df-4909-b61b-85f08f5a93f8", "subtype": "sql_schema", "name": "saas_schema"}
+      ]
+    },
+    "c06": {
+      "tasks": [
+        {"task_id": "8140e604-c9c8-4dee-bea1-d654b1e3f446", "subtype": "python_function", "name": "linked_list"},
+        {"task_id": "6a6dbbdb-74f3-42bb-8afd-6bcba40789af", "subtype": "python_function", "name": "anagram"},
+        {"task_id": "acfedcc4-e623-4067-ae7d-d9e5ba6132e8", "subtype": "python_class_simple", "name": "iterator_pattern"},
+        {"task_id": "b453a104-d5a6-4c87-815a-b8660ba6eac3", "subtype": "python_class_medium", "name": "circuit_breaker"},
+        {"task_id": "30c035cb-f667-42db-bd2b-197363401b99", "subtype": "python_class_complex", "name": "min_heap"},
+        {"task_id": "54e39b92-fa61-4541-98e6-f825fa843204", "subtype": "python_unittest", "name": "test_circuit_breaker"},
+        {"task_id": "2032dbd7-35b1-455c-b3d2-51d0b4d32cc7", "subtype": "bash_script", "name": "docker_cleanup"},
+        {"task_id": "34142f6b-c2a2-4e4e-864b-f4a8a9f4c937", "subtype": "terraform_module", "name": "sqs_lambda"},
+        {"task_id": "68d58160-36a0-4b01-ade6-eb87fae50db3", "subtype": "k8s_manifest", "name": "daemonset"},
+        {"task_id": "9709ea14-c2ec-4d3f-9b3b-00957652cc3c", "subtype": "sql_schema", "name": "ticketing_schema"}
+      ]
+    },
+    "c07": {
+      "tasks": [
+        {"task_id": "3efe7f4e-f83a-4ebb-b24a-4777db172b68", "subtype": "python_function", "name": "grid_search"},
+        {"task_id": "a999b5a5-7336-4db9-ab99-ed11c526e15d", "subtype": "python_function", "name": "encoding_utils"},
+        {"task_id": "f6882148-13e2-4b11-b5e1-c27734137c6c", "subtype": "python_class_simple", "name": "composite_filesystem"},
+        {"task_id": "9adcbbf5-1033-4ddc-8deb-00edd41adb14", "subtype": "python_class_medium", "name": "task_scheduler"},
+        {"task_id": "ed826ee9-6860-4b9e-950d-140ab6c22855", "subtype": "python_class_complex", "name": "bloom_filter"},
+        {"task_id": "4c5cd21f-adcc-4939-87b6-dd9f65311421", "subtype": "python_unittest", "name": "test_bloom_filter"},
+        {"task_id": "d24edcfd-9b1b-4be5-9e3f-eb62a495527c", "subtype": "bash_script", "name": "k8s_pod_monitor"},
+        {"task_id": "fad77dfa-d9ed-4533-9114-05c14edd4324", "subtype": "terraform_module", "name": "dynamodb_table"},
+        {"task_id": "73efa759-a7d0-498e-801f-b49457be7bdc", "subtype": "k8s_manifest", "name": "resource_quota"},
+        {"task_id": "afb6a8e3-cd37-4eb5-9cd9-7f1bf682a7b6", "subtype": "sql_schema", "name": "financial_schema"}
+      ]
+    },
+    "c08": {
+      "tasks": [
+        {"task_id": "11019438-7d93-4730-a304-e7ea991843a6", "subtype": "python_function", "name": "permutations"},
+        {"task_id": "c50fe52f-920b-44b5-af69-c6e236a65bbe", "subtype": "python_function", "name": "sliding_window"},
+        {"task_id": "976eab6b-867c-48dd-a063-0a0aba5ae78a", "subtype": "python_class_simple", "name": "flyweight"},
+        {"task_id": "86201d95-ebd2-4e87-ae25-40cc9ce03178", "subtype": "python_class_medium", "name": "event_store"},
+        {"task_id": "62ff715a-f8e2-470d-b3c1-49f4f096361e", "subtype": "python_class_complex", "name": "skip_list"},
+        {"task_id": "fd024853-78b3-4e85-b965-b5c73c6e91cd", "subtype": "python_unittest", "name": "test_event_store"},
+        {"task_id": "4b040968-51df-42e2-94b1-844c221bca40", "subtype": "bash_script", "name": "git_cleanup"},
+        {"task_id": "664e8387-4237-48ca-a02b-af0ec3ae7b20", "subtype": "terraform_module", "name": "api_gateway_lambda"},
+        {"task_id": "437e418a-9a96-4fbb-ad6c-1e79eeba0b91", "subtype": "k8s_manifest", "name": "init_sidecar"},
+        {"task_id": "252803ad-d206-429a-a222-44eea1d24f64", "subtype": "sql_schema", "name": "analytics_schema"}
+      ]
+    },
+    "c09": {
+      "tasks": [
+        {"task_id": "2e77605f-1879-4dc3-b72f-2e6a9db44033", "subtype": "python_function", "name": "top_k"},
+        {"task_id": "33e6f45e-ee4f-4625-b1e3-00708d41a0f6", "subtype": "python_function", "name": "cidr_utils"},
+        {"task_id": "915dfe5e-c5ff-412d-918d-474f86bb5d98", "subtype": "python_class_simple", "name": "mediator_chat"},
+        {"task_id": "baaef735-6546-4dbc-87f3-d453c65c6983", "subtype": "python_class_medium", "name": "object_pool"},
+        {"task_id": "ba1b4803-1191-42c5-9afb-70699d829a88", "subtype": "python_class_complex", "name": "consistent_hash"},
+        {"task_id": "abc53d90-ea2e-4dd6-a101-1b05c9f378d3", "subtype": "python_unittest", "name": "test_object_pool"},
+        {"task_id": "32546543-dd53-4ca5-a9c1-c35fdc5761a8", "subtype": "bash_script", "name": "service_health_retry"},
+        {"task_id": "7a89bfc5-176a-40a1-a434-56e27a224abc", "subtype": "terraform_module", "name": "eks_node_group"},
+        {"task_id": "d5cd33f3-d12c-48d9-ad0b-5bf0736eca76", "subtype": "k8s_manifest", "name": "hpa_custom_metrics"},
+        {"task_id": "1673c5fb-a6a0-4bc0-b3af-39440d74a2ab", "subtype": "sql_schema", "name": "social_network_schema"}
+      ]
+    },
+    "c10": {
+      "tasks": [
+        {"task_id": "0c6f51a2-5f3a-4cff-b025-3c7daa5a4f04", "subtype": "python_function", "name": "tree_serialize"},
+        {"task_id": "71df41df-cea4-4645-b4d8-441a6a1bbb4a", "subtype": "python_function", "name": "number_utils"},
+        {"task_id": "3a4c76ff-436b-4020-82af-09f7de915a3a", "subtype": "python_class_simple", "name": "state_machine"},
+        {"task_id": "656d6f2e-c497-497b-bad9-af069a4faf45", "subtype": "python_class_medium", "name": "retry_decorator"},
+        {"task_id": "c6ce32f8-14f3-4f4c-9d63-ba91f465e6b2", "subtype": "python_class_complex", "name": "lsm_tree"},
+        {"task_id": "128808cb-26fa-41a6-ba0c-65924ce33cb6", "subtype": "python_unittest", "name": "test_state_machine"},
+        {"task_id": "2b446d32-700f-4aa9-b1c0-2a914f7c4469", "subtype": "bash_script", "name": "pg_backup"},
+        {"task_id": "9a3a97bd-e203-4d9a-b569-bce8e73efd3f", "subtype": "terraform_module", "name": "elasticache_redis"},
+        {"task_id": "c9ea4c22-cbd2-4df4-8f45-305c67e580cd", "subtype": "k8s_manifest", "name": "batch_job"},
+        {"task_id": "6bd6b908-adda-4c99-b2d0-94768b7ef7ba", "subtype": "sql_schema", "name": "iot_schema"}
+      ]
+    }
+  },
+  "known_bugs_to_watch": {
+    "python_class_complex": "BST delete two-children case, graph dijkstra may use BFS",
+    "terraform_module": "environment = var instead of environment { variables = var }",
+    "k8s_manifest": "autoscaling/v2beta1 deprecated, image placeholder literals",
+    "bash_script": "curl without -o /dev/null -s -w will fail",
+    "python_unittest": "math errors in expected values (count_vowels case seen in round 2)",
+    "readme": "hallucinates internet requirement for local Ollama, invents install instructions"
+  },
+  "analysis_queries": [
+    "pass_rate_by_subtype: count passed/total per subtype across all cycles",
+    "duration_by_subtype: avg/min/max duration per subtype",
+    "timeout_failures: tasks that hit timeout vs completed",
+    "consistency_score: same bug appears in N/10 cycles for a given subtype",
+    "truncation_rate: tasks with incomplete output (missing class definitions etc)"
+  ]
+}
