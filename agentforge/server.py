@@ -28,6 +28,7 @@ Como conectar a Claude Desktop:
   }
 """
 
+import asyncio
 import json
 from typing import Any
 
@@ -35,10 +36,10 @@ import anyio
 from fastmcp import FastMCP
 
 from agentforge.models import (
-    AuditRecord, BatchRequest, ExecutionManifest, TaskStatus,
+    AuditRecord, BatchRequest, ExecutionManifest,
 )
 from agentforge.ollama.client import check_health
-from agentforge.orchestrator import execute_batch, execute_task, get_task_status
+from agentforge.orchestrator import execute_task, get_task_status
 from agentforge.utils import (
     list_pending_review, mark_reviewed, read_audit, read_output_content,
 )
@@ -61,10 +62,11 @@ mcp = FastMCP(
 @mcp.tool()
 async def agentforge_execute(manifest: dict[str, Any]) -> dict[str, Any]:
     """
-    Ejecuta un Execution Manifest y retorna el resultado.
+    Ejecuta un Execution Manifest en background y retorna el task_id inmediatamente.
 
     El manifest define QUE generar, de DONDE leer los inputs y DONDE escribir
-    el output. Claude construye el manifest; AgentForge lo ejecuta con Ollama.
+    el output. Claude construye el manifest; AgentForge lo ejecuta con Ollama
+    sin bloquear la sesion.
 
     Args:
         manifest: Execution Manifest como dict. Debe tener los campos:
@@ -76,20 +78,28 @@ async def agentforge_execute(manifest: dict[str, Any]) -> dict[str, Any]:
     Returns:
         {
             task_id: str,
-            status: "completed" | "failed",
-            duration_seconds: float,
-            validation_passed: bool,
-            output_path: str,
-            error: str | None
+            status: "queued",
+            message: str
         }
+
+    Flujo recomendado:
+        1. agentforge_execute(manifest) → recibe task_id
+        2. Continuar trabajando en otras cosas
+        3. agentforge_status(task_id) para ver si termino
+        4. agentforge_pending() para ver todas las tareas listas
+        5. agentforge_audit(task_id) para revisar y aprobar
     """
     try:
         m = ExecutionManifest.model_validate(manifest)
     except Exception as e:
         return {"error": f"Manifest invalido: {e}", "status": "failed"}
 
-    record = await execute_task(m)
-    return _record_to_response(record)
+    asyncio.create_task(execute_task(m))
+    return {
+        "task_id": m.task_id,
+        "status": "queued",
+        "message": "Tarea encolada en background. Usa agentforge_status para monitorear.",
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -208,17 +218,15 @@ async def agentforge_batch(
     except Exception as e:
         return {"error": f"Manifest invalido en el batch: {e}", "status": "failed"}
 
-    records = await execute_batch(validated, max_parallel=max_parallel)
-
-    completed = sum(1 for r in records if r.status == TaskStatus.COMPLETED)
-    failed = sum(1 for r in records if r.status == TaskStatus.FAILED)
+    for m in validated:
+        asyncio.create_task(execute_task(m))
 
     return {
-        "batch_id": str(id(records)),
-        "total": len(records),
-        "completed": completed,
-        "failed": failed,
-        "tasks": [_record_to_response(r) for r in records],
+        "batch_id": str(id(validated)),
+        "total": len(validated),
+        "status": "queued",
+        "task_ids": [m.task_id for m in validated],
+        "message": f"{len(validated)} tareas encoladas. Usa agentforge_pending() para ver resultados.",
     }
 
 
@@ -269,8 +277,12 @@ async def agentforge_from_md(
     except Exception as e:
         return {"error": f"Manifest inválido: {e}", "status": "failed"}
 
-    record = await execute_task(m)
-    return _record_to_response(record)
+    asyncio.create_task(execute_task(m))
+    return {
+        "task_id": m.task_id,
+        "status": "queued",
+        "message": "Tarea encolada en background. Usa agentforge_status para monitorear.",
+    }
 
 
 # ---------------------------------------------------------------------------
