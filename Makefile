@@ -2,7 +2,7 @@
 
 VENV       := .venv/bin/python3
 SERVER_CMD := -m agentforge.server
-OLLAMA     := http://192.168.128.4:11434
+OLLAMA     ?= http://localhost:11434
 MODEL      := codellama:13b
 MAX_PAR    := 1
 MAX_TOK    := 4096

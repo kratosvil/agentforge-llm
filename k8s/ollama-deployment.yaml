@@ -34,7 +34,7 @@ spec:
               cpu: "3"
           env:
             - name: OLLAMA_HOST
-              value: "0.0.0.0"
+              value: "127.0.0.1"
           volumeMounts:
             - name: ollama-models
               mountPath: /root/.ollama
