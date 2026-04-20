@@ -19,12 +19,12 @@ TEMPLATES_DIR = Path(os.getenv("TEMPLATES_DIR", BASE_DIR / "templates"))
 
 # --- Ollama ---
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-MODEL_NAME = os.getenv("MODEL_NAME", "qwen2.5-coder:7b")
+MODEL_NAME = os.getenv("MODEL_NAME", "codellama:13b")
 
 # --- Comportamiento del agente ---
-# Maximo 2 tareas en paralelo: qwen2.5-coder:7b usa ~6.5GB RAM c/u
-# 2 instancias = 13GB — dentro del limite de 15.5GB del hardware
-MAX_PARALLEL_TASKS = int(os.getenv("MAX_PARALLEL_TASKS", "2"))
+# codellama:13b usa ~7.4GB VRAM — corre una sola instancia en RTX 2070 8GB
+# Para paralelo bajar a un modelo 7B o reducir MAX_PARALLEL_TASKS a 1
+MAX_PARALLEL_TASKS = int(os.getenv("MAX_PARALLEL_TASKS", "1"))
 
 # Timeout por tarea: 300s = 5 min (criterio de aceptacion del plan)
 TASK_TIMEOUT_SECONDS = int(os.getenv("TASK_TIMEOUT_SECONDS", "300"))

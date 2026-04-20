@@ -61,6 +61,8 @@ async def run_prompt(
             "temperature": temperature,
             "top_p": 0.9,
             "num_predict": max_tokens,
+            "num_ctx": 4096,
+            "stop": [],
         },
     }
 
