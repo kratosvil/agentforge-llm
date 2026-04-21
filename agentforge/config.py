@@ -29,6 +29,9 @@ MAX_PARALLEL_TASKS = int(os.getenv("MAX_PARALLEL_TASKS", "1"))
 # Timeout por tarea: 300s = 5 min (criterio de aceptacion del plan)
 TASK_TIMEOUT_SECONDS = int(os.getenv("TASK_TIMEOUT_SECONDS", "300"))
 
+# Pausa entre tareas consecutivas — reduce presión térmica/VRAM en batch sostenido
+TASK_COOLDOWN_SECONDS = int(os.getenv("TASK_COOLDOWN_SECONDS", "15"))
+
 # Temperatura baja = output determinístico (critico para codigo)
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.1"))
 LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "4096"))

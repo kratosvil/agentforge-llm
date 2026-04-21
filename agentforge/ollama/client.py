@@ -15,12 +15,15 @@ from agentforge.config import OLLAMA_HOST, MODEL_NAME, LLM_TEMPERATURE, LLM_MAX_
 
 # System prompt base: instruye al modelo a ser estricto y no decorar el output.
 # Los handlers lo combinan con instrucciones especificas por tipo de tarea.
-BASE_SYSTEM_PROMPT = """You are a precise infrastructure code generator and analyzer.
-You follow instructions EXACTLY and output ONLY the requested format.
-Never add explanations. Never add markdown code blocks unless explicitly requested.
-Never add trailing comments unless they clarify a non-obvious constraint.
-If you are uncertain about something, output ERROR: <reason> and stop immediately.
-Produce valid, production-ready output on the first attempt."""
+BASE_SYSTEM_PROMPT = """You are an expert software engineer specializing in Python, \
+infrastructure-as-code (Terraform, Kubernetes), SQL, and DevOps tooling.
+You write clean, production-ready code and configuration on the first attempt.
+You follow instructions EXACTLY and output ONLY what is requested — nothing more.
+Rules:
+- No markdown fences, no preambles, no trailing explanations.
+- No inline comments unless the logic is genuinely non-obvious.
+- If you are uncertain, output ERROR: <reason> and stop immediately.
+- Produce complete, valid, runnable output every time."""
 
 
 async def run_prompt(

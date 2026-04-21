@@ -19,7 +19,7 @@ Concurrencia:
 import asyncio
 from datetime import datetime, timezone
 
-from agentforge.config import MAX_PARALLEL_TASKS, RESULTS_DIR, ensure_dirs
+from agentforge.config import MAX_PARALLEL_TASKS, RESULTS_DIR, TASK_COOLDOWN_SECONDS, ensure_dirs
 from agentforge.handlers import get_handler
 from agentforge.models import AuditRecord, ExecutionManifest, TaskStatus, OnFailure
 from agentforge.utils import (
@@ -149,6 +149,11 @@ async def execute_task(manifest: ExecutionManifest) -> AuditRecord:
                 validation_passed=record.validation.passed if record.validation else None,
                 error=record.error,
             )
+
+        # Cooldown: mantener el semáforo ocupado para que la GPU libere presión
+        # antes de iniciar la siguiente tarea en batch
+        if TASK_COOLDOWN_SECONDS > 0:
+            await asyncio.sleep(TASK_COOLDOWN_SECONDS)
 
     return record
 

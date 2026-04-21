@@ -98,6 +98,7 @@ class ExecutionManifest(BaseModel):
     created_by: str = "claude-sonnet-4-6"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     project: str = ""
+    model: str = ""  # Override del modelo — vacío = usar MODEL_NAME del config
 
     task: TaskDefinition
     input: InputDefinition

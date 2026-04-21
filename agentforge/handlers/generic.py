@@ -11,7 +11,7 @@ El output_filename se deriva de manifest.output.format.
 
 import re
 
-from agentforge.config import TEMPLATES_DIR
+from agentforge.config import MODEL_NAME, TEMPLATES_DIR
 from agentforge.models import ExecutionManifest
 from agentforge.ollama.client import run_prompt
 
@@ -70,6 +70,7 @@ async def handle(manifest: ExecutionManifest) -> tuple[str, str]:
 
     output = await run_prompt(
         prompt=prompt,
+        model=manifest.model or MODEL_NAME,
         timeout=manifest.task.timeout_seconds,
     )
 
